@@ -1,0 +1,16 @@
+/k6
+/k6.exe
+/dist
+/js/node_modules
+/docs
+/pkg-build
+
+/debug
+test.debug
+
+.vscode
+*.sublime-workspace
+.idea
+.vagrant
+
+*.DS_Store

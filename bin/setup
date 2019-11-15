@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo "Building Base Image.."
+docker build . -t robotodd-base -f docker/Base.Dockerfile
+
+echo "Building Dev Image.."
+docker build . -t robotodd-dev -f docker/Dev.Dockerfile
