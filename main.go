@@ -27,8 +27,9 @@ type harFileEntryRequestPostData struct {
 }
 
 type harFileHeader struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
+	Name    string `json:"name"`
+	Value   string `json:"value"`
+	Comment string `json:"comment"`
 }
 
 type harFileResponseBodyContent struct {
@@ -36,6 +37,7 @@ type harFileResponseBodyContent struct {
 	Compression int    `json:"compression"`
 	MimeType    string `json:"mimeType"`
 	Text        string `json:"text"`
+	Comment     string `json:"comment"`
 }
 
 type harFileCookie struct {
@@ -49,8 +51,9 @@ type harFileCookie struct {
 }
 
 type harFileQueryString struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
+	Name    string `json:"name"`
+	Value   string `json:"value"`
+	Comment string `json:"comment"`
 }
 
 type harFileEntryRequest struct {
@@ -98,6 +101,9 @@ type harFileLog struct {
 
 type harFile struct {
 	Log harFileLog `json:"log"`
+}
+
+type domainConfig struct {
 }
 
 // @TODO change this to
@@ -157,7 +163,7 @@ func filterHar(fileName string, domainWhiteList string) []byte {
 	return marshalled
 }
 
-func createLoadTestFromHar(harString []byte) {
+func createLoadTestFromHar(hookFile []byte, harString []byte) {
 	var opts harlibOpts.Options
 	only := make([]string, 1)
 	only = append(only, "api3.fox.com")
@@ -165,11 +171,15 @@ func createLoadTestFromHar(harString []byte) {
 	// harBytes := []byte(harString)
 	bytesReader := bytes.NewReader(harString)
 	harObj, _ := har.Decode(bytesReader)
-	log.Print(har.Convert(harObj, opts, uint(0), uint(10), true, false, uint(10), false, false, only, skip))
+	log.Print(har.Convert(string(hookFile), harObj, opts, uint(0), uint(10), true, false, uint(10), false, false, only, skip))
 }
 
 func main() {
 	// convertLog("test-data/Android.chls")
 	harString := filterHar("output/Android.chls.har", "api3.fox.com")
-	createLoadTestFromHar(harString)
+	hookFile, err := ioutil.ReadFile("defaultHookFile.js")
+	if err != nil {
+		log.Fatal(err)
+	}
+	createLoadTestFromHar(hookFile, harString)
 }

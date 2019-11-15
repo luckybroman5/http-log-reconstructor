@@ -9,6 +9,8 @@ This tool is used to take a form of http archive (charles log, .har, etc) and ge
 
 #### Current Work:
 * Obtain and document “Wildcard values”, meaning things like dma, authorization, apikey, geo lat and long, etc are not captured for security / privacy and the ability variate the values in a load test
+* Add random variation between sleep cylces
+* Import helper functions and run browserify for a more rich feature set of load tests
 
 ## Technologies:
 * Docker
