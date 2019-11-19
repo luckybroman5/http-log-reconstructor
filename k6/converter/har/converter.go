@@ -93,8 +93,11 @@ func Convert(hookFile string, h HAR, options lib.Options, minSleep, maxSleep uin
 	if h.Log.Comment != "" {
 		fprintf(w, "// %v\n", h.Log.Comment)
 	}
-	fprint(w, "\n\n/** helper function to generate the request hook */\nfunction __applyKadeRequestHooks__(requests) { return requests.map(requestHook) }\n")
+	fprint(w, "\n\nfunction __applyKadeRequestHooks__(requests) { return requests.map((r) => { r.body = JSON.parse(r.body || '{}'); const nr = requestHook(r); nr.body = JSON.stringify(nr.body || {}); return nr; } )}\n")
 	fprint(w, "function __applyKadeResponseHooks__(responses) { const resp = {}; Object.keys(responses).forEach((k) => resp[k] = responseHook(responses[k])); return resp }\n\n")
+
+	fprint(w, "// Clyde \n")
+	fprint(w, "\nexport function errorCodeHelper(t,s){s&&s.status&&200!==s.status?check(s,{[`${t} ${s.status}`]:t=>!0}):200===s.status?check(s,{[`${t} ${s.status} but has bad data`]:t=>!0}):console.log(\"No status provided\")}\n\n")
 
 	fprint(w, "\nexport let options = Object.assign( k6Options || {}, {\n")
 	options.ForEachSpecified("json", func(key string, val interface{}) {
@@ -246,7 +249,12 @@ func Convert(hookFile string, h HAR, options lib.Options, minSleep, maxSleep uin
 							if returnOnFailedCheck {
 								fprintf(w, "\t\tif (!check(res, {\"status is %v\": (r) => r.status === %v })) { return };\n", e.Response.Status, e.Response.Status)
 							} else {
-								fprintf(w, "\t\tcheck(res, {\"status is %v\": (r) => r.status === %v });\n", e.Response.Status, e.Response.Status)
+								// fprintf(w, "\t\tcheck(res, {\"status is %v\": (r) => r.status === %v });\n", e.Response.Status, e.Response.Status)
+								outputNameArr := strings.Split(e.Request.URL, "/")
+								outputNameWithQS := outputNameArr[len(outputNameArr)-1]
+								outputNameWithoutQS := strings.Split(outputNameWithQS, "?")
+								outputName := outputNameWithoutQS[0]
+								fprintf(w, "\t\terrorCodeHelper('/%s check is status', r)", outputName)
 							}
 						}
 					}
@@ -299,7 +307,12 @@ func Convert(hookFile string, h HAR, options lib.Options, minSleep, maxSleep uin
 							if returnOnFailedCheck {
 								fprintf(w, "\t\tif (!check(res, {\"status is %v\": (r) => r.status === %v })) { return };\n", e.Response.Status, e.Response.Status)
 							} else {
-								fprintf(w, "\t\tcheck(res[%v], {\"status is %v\": (r) => r.status === %v });\n", k, e.Response.Status, e.Response.Status)
+								// fprintf(w, "\t\tcheck(res[%v], {\"status is %v\": (r) => r.status === %v });\n", k, e.Response.Status, e.Response.Status)
+								outputNameArr := strings.Split(e.Request.URL, "/")
+								outputNameWithQS := outputNameArr[len(outputNameArr)-1]
+								outputNameWithoutQS := strings.Split(outputNameWithQS, "?")
+								outputName := outputNameWithoutQS[0]
+								fprintf(w, "\t\terrorCodeHelper(\"/%v check is status\", res[%v])\n", outputName, k)
 							}
 						}
 					}

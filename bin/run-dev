@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker run -v $(pwd):/root/go/src/github.com/luckybroman5/http-log-reconstructor robotodd-dev $@
+docker run --rm -v $(pwd):/root/go/src/github.com/luckybroman5/http-log-reconstructor robotodd-dev $@

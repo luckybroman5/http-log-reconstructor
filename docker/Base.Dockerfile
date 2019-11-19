@@ -2,7 +2,7 @@ FROM ubuntu
 
 # Install basic stuff
 RUN apt-get update
-RUN apt-get install curl wget -y
+RUN apt-get install curl wget git -y
 
 # Install Go
 RUN apt-get update
