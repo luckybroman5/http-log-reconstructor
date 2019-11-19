@@ -94,7 +94,7 @@ func Convert(hookFile string, h HAR, options lib.Options, minSleep, maxSleep uin
 		fprintf(w, "// %v\n", h.Log.Comment)
 	}
 	fprint(w, "\n\nfunction __applyKadeRequestHooks__(requests) { return requests.map((r) => { r.body = JSON.parse(r.body || '{}'); const nr = requestHook(r); nr.body = JSON.stringify(nr.body || {}); return nr; } )}\n")
-	fprint(w, "function __applyKadeResponseHooks__(responses) { const resp = {}; Object.keys(responses).forEach((k) => resp[k] = responseHook(responses[k])); return resp }\n\n")
+	fprint(w, "function __applyKadeResponseHooks__(responses) { const resp = {}; Object.keys(responses).forEach((k) => { try { responses[k].body = JSON.parse(responses[k].body); } catch (e) { responses[k].body = {} } resp[k] = responseHook(responses[k]) }); return resp }\n\n")
 
 	fprint(w, "// Clyde \n")
 	fprint(w, "\nexport function errorCodeHelper(t,s){s&&s.status&&200!==s.status?check(s,{[`${t} ${s.status}`]:t=>!0}):200===s.status?check(s,{[`${t} ${s.status}`]:t=>!0}):console.log(\"No status provided\")}\n\n")
