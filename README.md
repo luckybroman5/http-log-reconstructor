@@ -45,9 +45,13 @@ The `default-template` is just a basic starting point. The idea is if you have t
 You should run the command above if you haven't yet. Here is a reference for it:
 
 `k6Options` - An object that you can use to set the k6Options as defined [here](https://docs.k6.io/docs/options)
+
 `before()` - Called before each time the "default" k6 function is called. This could be used to generate a random email for a user registration request
+
 `requestHook()` - Called before any http call. The raw object that would be used on the call is passed in, and you can modify it in any way you choose
+
 `responseHook()` - Called after every http response. This is so you can extract values as needed, then set them to a global state to be used in further reqeusts
+
 `after()` - Called each time after the "default" k6 function is called. This is where you can reset any previous state you might have set in the `responseHook()`
 
 A typical Scenario for using each of the functions is as follows:
