@@ -21,7 +21,7 @@ var (
 
 	cmdCreate = &cobra.Command{
 		Use:   "create [inputFile]",
-		Short: "Takes a .har or .chls file, and creats a load test",
+		Short: "Prints the default hookfile",
 		Long: `Takes a HTTP Archive or Charles log, converts it into a .har int he case of it being
 a Charles Log, does some basic processing on the .har, and outputs a k6 load test that very closely
 mimics the actions performed in the logs. If it doesn't write the test 100% for you, it'll be 99.9999%`,
@@ -72,7 +72,9 @@ func CreateK6LoadTest(cmd *cobra.Command, args []string) {
 	charlesLogHarBytes = HarProcessing.FilterHar(charlesLogHarBytes, (*domainFilter)[0])
 
 	hookFileBytes, _ := ioutil.ReadFile(hookFile)
-	K6Wrapper.CreateLoadTestFromHar(hookFileBytes, charlesLogHarBytes)
+	loadTest := K6Wrapper.CreateLoadTestFromHar(hookFileBytes, charlesLogHarBytes)
+
+	fmt.Println(loadTest)
 }
 
 // Execute executes the root command.

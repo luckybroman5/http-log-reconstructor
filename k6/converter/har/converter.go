@@ -97,7 +97,7 @@ func Convert(hookFile string, h HAR, options lib.Options, minSleep, maxSleep uin
 	fprint(w, "function __applyKadeResponseHooks__(responses) { const resp = {}; Object.keys(responses).forEach((k) => resp[k] = responseHook(responses[k])); return resp }\n\n")
 
 	fprint(w, "// Clyde \n")
-	fprint(w, "\nexport function errorCodeHelper(t,s){s&&s.status&&200!==s.status?check(s,{[`${t} ${s.status}`]:t=>!0}):200===s.status?check(s,{[`${t} ${s.status} but has bad data`]:t=>!0}):console.log(\"No status provided\")}\n\n")
+	fprint(w, "\nexport function errorCodeHelper(t,s){s&&s.status&&200!==s.status?check(s,{[`${t} ${s.status}`]:t=>!0}):200===s.status?check(s,{[`${t} ${s.status}`]:t=>!0}):console.log(\"No status provided\")}\n\n")
 
 	fprint(w, "\nexport let options = Object.assign( k6Options || {}, {\n")
 	options.ForEachSpecified("json", func(key string, val interface{}) {

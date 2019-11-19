@@ -58,11 +58,5 @@ Once done, you'll have a runnable k6 load test that provides ultimate flexibilit
 
 // Execute executes the root command.
 func Execute() error {
-	// RootCmd.AddCommand(cmdPrintDefaultHookFile, cmdCreate)
-
-	// domainFilter = cmdCreate.Flags().StringArrayP("domainFilter", "f", []string{"example.com"}, "filter the load test to certain domains")
-	// cmdCreate.Flags().StringVarP(&charlesExecutable, "charles-executable", "c", "charles", "path the charles executable")
-
-	// cmdEcho.AddCommand(cmdTimes)
 	return RootCmd.Execute()
 }
