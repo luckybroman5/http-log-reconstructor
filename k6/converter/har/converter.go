@@ -58,7 +58,7 @@ func fprintf(w io.Writer, format string, a ...interface{}) int {
 }
 
 // TODO: refactor this to have fewer parameters... or just refactor in general...
-func Convert(hookFile string, h HAR, options lib.Options, minSleep, maxSleep uint, enableChecks bool, returnOnFailedCheck bool, batchTime uint, nobatch bool, correlate bool, only, skip []string) (result string, convertErr error) {
+func Convert(hookFile string, h HAR, options lib.Options, minSleep, maxSleep uint, enableChecks bool, returnOnFailedCheck bool, batchTime uint, nobatch bool, correlate bool, only, skip []string, disableSleep bool) (result string, convertErr error) {
 	var b bytes.Buffer
 	w := bufio.NewWriter(&b)
 
@@ -318,30 +318,32 @@ func Convert(hookFile string, h HAR, options lib.Options, minSleep, maxSleep uin
 					}
 				}
 
-				if j != len(batches)-1 {
+				if j != len(batches)-1 && disableSleep != true {
 					lastBatchEntry := batchEntries[len(batchEntries)-1]
 					firstBatchEntry := batches[j+1][0]
 					t := firstBatchEntry.StartedDateTime.Sub(lastBatchEntry.StartedDateTime).Seconds()
-					fprintf(w, "\t\tsleep(%.2f);\n", t)
+					fprintf(w, "\t\tsleep(Math.floor(Math.random()*5) + %.2f);\n", t)
 				}
 			}
 
-			if i == len(pages)-1 {
-				// Last page; add random sleep time at the group completion
-				fprintf(w, "\t\t// Random sleep between %ds and %ds\n", minSleep, maxSleep)
-				fprintf(w, "\t\tsleep(Math.floor(Math.random()*%d+%d));\n", maxSleep-minSleep, minSleep)
-			} else {
-				// Add sleep time at the end of the group
-				nextPage := pages[i+1]
-				sleepTime := 0.5
-				if len(entries) > 0 {
-					lastEntry := entries[len(entries)-1]
-					t := nextPage.StartedDateTime.Sub(lastEntry.StartedDateTime).Seconds()
-					if t >= 0.01 {
-						sleepTime = t
+			if disableSleep != true {
+				if i == len(pages)-1 {
+					// Last page; add random sleep time at the group completion
+					fprintf(w, "\t\t// Random sleep between %ds and %ds\n", minSleep, maxSleep)
+					fprintf(w, "\t\tsleep(Math.floor(Math.random()*%d+%d));\n", maxSleep-minSleep, minSleep)
+				} else {
+					// Add sleep time at the end of the group
+					nextPage := pages[i+1]
+					sleepTime := 0.5
+					if len(entries) > 0 {
+						lastEntry := entries[len(entries)-1]
+						t := nextPage.StartedDateTime.Sub(lastEntry.StartedDateTime).Seconds()
+						if t >= 0.01 {
+							sleepTime = t
+						}
 					}
+					fprintf(w, "\t\tsleep(%.2f);\n", sleepTime)
 				}
-				fprintf(w, "\t\tsleep(%.2f);\n", sleepTime)
 			}
 		}
 

@@ -2,9 +2,8 @@ package HarProcessing
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"log"
-	"strings"
+	"regexp"
 )
 
 type harFilePostRequestDataParams struct {
@@ -97,7 +96,7 @@ type harFile struct {
 	Log harFileLog `json:"log"`
 }
 
-func FilterHar(harBytes []byte, domainWhiteList string) []byte {
+func FilterHar(harBytes []byte, domainWhiteList []string) []byte {
 	var parsedHarFile harFile
 	json.Unmarshal(harBytes, &parsedHarFile)
 
@@ -109,8 +108,15 @@ func FilterHar(harBytes []byte, domainWhiteList string) []byte {
 	newHarFile.Log.Creator.Version = "0.1"
 
 	for _, v := range parsedHarFile.Log.Entries {
-		if strings.Index(v.Request.URL, domainWhiteList) != -1 {
-			newHarFile.Log.Entries = append(newHarFile.Log.Entries, v)
+		// log.Println(len(*domainWhiteList))
+		for _, domain := range domainWhiteList {
+			matched, err := regexp.MatchString(domain, v.Request.URL)
+			if err != nil {
+				log.Println(err)
+			}
+			if matched == true {
+				newHarFile.Log.Entries = append(newHarFile.Log.Entries, v)
+			}
 		}
 	}
 
@@ -119,6 +125,5 @@ func FilterHar(harBytes []byte, domainWhiteList string) []byte {
 		log.Print(err)
 	}
 
-	ioutil.WriteFile("output/test.har", marshalled, 0644)
 	return marshalled
 }

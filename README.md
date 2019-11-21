@@ -73,8 +73,6 @@ SIMPLE! just edit the produced javascript file in anyway you need!
 ---
 
 #### Current Work:
-* Cleanup Implementation for the first release
-* Add random variation between sleep cylces
 * Import helper functions and run browserify for a more rich feature set of load tests
 
 #### Very Cool to have work:
@@ -90,7 +88,11 @@ SIMPLE! just edit the produced javascript file in anyway you need!
 
 # Completed Work:
 
-#### ~~MVP Requirements:~~
 * ~~Parse a charles log and extract whitlisted requests~~
 * ~~output some form of load test to be ran~~
 * ~~Obtain and document “Wildcard values”, meaning things like dma, authorization, apikey, geo lat and long, etc are not captured for security / privacy and the ability variate the values in a load test~~
+* ~~Cleanup Implementation for the first release~~
+* ~~Remove the build logs at the start of the generated test files~~
+* ~~Allow disabling sleep cycles from the cli (havoc mode)~~
+* ~~Allow the importing of straight .har files~~
+* ~~Add random variation between sleep cylces~~

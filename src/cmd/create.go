@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/luckybroman5/http-log-reconstructor/src/CharlesParsing"
 	"github.com/luckybroman5/http-log-reconstructor/src/HarProcessing"
@@ -15,9 +16,10 @@ import (
 
 var (
 	// Used for flags.
-	domainFilter      *[]string
+	domainFilter      string
 	charlesExecutable string
 	hookTemplate      string
+	havocFlag         bool
 
 	cmdCreate = &cobra.Command{
 		Use:   "create [inputFile]",
@@ -64,16 +66,30 @@ func CreateK6LoadTest(cmd *cobra.Command, args []string) {
 	} else {
 		hookFile = hookTemplate
 	}
+
+	// Printing the Generation logs at the tob of generated test file
+	fmt.Println("/** Script Generation Logs: ---")
+	if havocFlag == true {
+		fmt.Println("Havoc mode enabled!")
+	}
 	fmt.Println("Creating a load test with inputFile:", inputFile, "and using:", hookFile, "as the hook file...")
-	fmt.Println(*domainFilter)
+	domainFilterArray := strings.Split(domainFilter, ",")
 	fmt.Println("Charles Executable:", charlesExecutable)
 
-	charlesLogHarBytes := CharlesParsing.ConvertLog(inputFile, charlesExecutable)
-	charlesLogHarBytes = HarProcessing.FilterHar(charlesLogHarBytes, (*domainFilter)[0])
+	var harBytes []byte
+
+	if strings.Index(inputFile, ".har") == -1 {
+		harBytes = CharlesParsing.ConvertLog(inputFile, charlesExecutable)
+	} else {
+		harBytes, _ = ioutil.ReadFile(inputFile)
+	}
+	harBytes = HarProcessing.FilterHar(harBytes, domainFilterArray)
 
 	hookFileBytes, _ := ioutil.ReadFile(hookFile)
-	loadTest := K6Wrapper.CreateLoadTestFromHar(hookFileBytes, charlesLogHarBytes)
+	loadTest := K6Wrapper.CreateLoadTestFromHar(hookFileBytes, harBytes, havocFlag)
 
+	fmt.Println(" --- End Generation Logs */")
+	fmt.Println("")
 	fmt.Println(loadTest)
 }
 
@@ -81,7 +97,8 @@ func CreateK6LoadTest(cmd *cobra.Command, args []string) {
 func init() {
 	//@TODO: Make it possible to just read the charles file from stdin!
 	RootCmd.AddCommand(cmdCreate)
-	domainFilter = cmdCreate.Flags().StringArrayP("domainFilter", "f", []string{"example.com"}, "filter the load test to certain domains")
+	cmdCreate.Flags().StringVarP(&domainFilter, "domainFilter", "f", "example.com", "filter the load test to certain domains")
 	cmdCreate.Flags().StringVarP(&charlesExecutable, "charles-executable", "c", "charles", "path the charles executable")
 	cmdCreate.Flags().StringVarP(&hookTemplate, "hookTemplate", "t", "", "the hooktemplate to be placed into the load test")
+	cmdCreate.Flags().BoolVar(&havocFlag, "havoc", false, "set to true if you want to generate as much chaos as possible!")
 }
